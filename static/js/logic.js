@@ -1,8 +1,3 @@
-// // Create the map with our layers
-// var map = L.map("map", {
-//     center: [36.7783, -119.4179],
-//     zoom: 6,
-//   });
 
 // Create the tile layer that will be the background of our map
 var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
@@ -11,10 +6,6 @@ var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/{
   id: "light-v10",
   accessToken: API_KEY
 });
-
-// // Add our 'lightmap' tile layer to the map
-// lightmap.addTo(map);
-
 
 // Use this link to get the geojson data.
 var link = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
@@ -72,26 +63,16 @@ function displayLegend(){
        strng += "<p style = \"color: "+legendInfo[i].color + "\">"+legendInfo[i].label+"</p> ";
     }
     return strng;
-}
+  }
 
-// Perform a GET request to the query URL
-d3.json(link, function(data) {
-    // Once we get a response, send the data.features object to the createFeatures function
-    createFeatures(data.features);
+  // Perform a GET request to the query URL
+  d3.json(link, function(data) {
+      // Once we get a response, send the data.features object to the createFeatures function
+      createFeatures(data.features);
   });
 
 
-
-// Perform a GET request to the query URL
-// d3.json(link2, function(data) {
-//     L.geoJSON(data, {
-//       style: function() {
-//         return {color: "brown", fillOpacity: 0}
-//       }
-//     }).addTo(faultLines)
-// });
-
-function createFeatures(data) {
+  function createFeatures(data) {
     
     function onEachLayer(feature) {
         return new L.circleMarker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], {
@@ -140,11 +121,31 @@ function createMap(earthquakes) {
         zoomOffset: -1,
         accessToken: API_KEY
     });
+
+    var outdoormap = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox/outdoors-v11',
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken: API_KEY
+    });
   
+    var satellitemap = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox/satellite-v9',
+        tileSize: 512,
+        zoomOffset: -1,
+        accessToken: API_KEY
+    });
+
     // Define a baseMaps object to hold our base layers
     var baseMaps = {
       "Street Map": streetmap,
-      "Dark Map": darkmap
+      "Dark Map": darkmap,
+      "Outdoors Map": outdoormap,
+      "Satellite Map": satellitemap
     };
     // Create the faultline layer
     var faultLines = new L.LayerGroup();
@@ -160,7 +161,9 @@ function createMap(earthquakes) {
       zoom: 6,
       layers: [earthquakes, faultLines]
     });
+
     lightmap.addTo(map); 
+
     // Create a layer control
     // Pass in our baseMaps and overlayMaps
     // Add the layer control to the map
@@ -175,7 +178,7 @@ function createMap(earthquakes) {
           return {color: "brown", fillOpacity: 0}
         }
       }).addTo(faultLines)
-  });
+    });
 
     var info = L.control({
         position: "bottomright"
